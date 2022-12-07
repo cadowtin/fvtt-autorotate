@@ -17,11 +17,11 @@ Hooks.on('ready', () => {
             defaultRotationMode: {
                 name: "Default Rotation Mode",
                 hint: "The rotation mode used for tokens that do not have " +
-                      "automatic rotation explicitly enabled or disabled.",
+                    "automatic rotation explicitly enabled or disabled.",
                 scope: "world",
                 config: true,
                 choices: {
-                    "regular"  : "Regular",
+                    "regular": "Regular",
                     "automatic": "Automatic",
                 },
             }
@@ -40,12 +40,12 @@ const RIGHT = 'ArrowRight';
 const SHIFT = 'Shift';
 
 
-function getFlag(document, flag){
+function getFlag(document, flag) {
     return document.flags[core.MODULE_SCOPE]?.[flag];
 }
 
 
-function shouldRotate(tokenDocument){
+function shouldRotate(tokenDocument) {
     // `null` if not set, otherwise `true` or `false`
     const enabled = getFlag(tokenDocument, 'enabled');
     return (
@@ -59,14 +59,14 @@ function shouldRotate(tokenDocument){
 }
 
 
-function rotationOffset(tokenDocument){
+function rotationOffset(tokenDocument) {
     const offset = getFlag(tokenDocument, 'offset');
     if (offset == null) return 0;
     return offset;
 }
 
 
-function rotationFromPositionDelta(deltaX, deltaY, offset){
+function rotationFromPositionDelta(deltaX, deltaY, offset) {
     // Convert our delta to an angle, then adjust for the fact that the
     // rotational perspective in Foundry is shifted 90 degrees
     // counterclockwise.
@@ -84,7 +84,7 @@ async function rotateTokenOnPreUpdate(tokenDocument, change, options, userId) {
         userId === game.user.id &&
         shouldRotate(tokenDocument)
     )
-    if (!cont){
+    if (!cont) {
         return;
     }
 
@@ -107,7 +107,7 @@ async function rotateTokenOnPreUpdate(tokenDocument, change, options, userId) {
     const STOP_MOVEMENT = (
         game.keyboard.downKeys.has(SHIFT) &&
         (
-            game.keyboard.downKeys.has(UP)   ||
+            game.keyboard.downKeys.has(UP) ||
             game.keyboard.downKeys.has(DOWN) ||
             game.keyboard.downKeys.has(LEFT) ||
             game.keyboard.downKeys.has(RIGHT)
@@ -122,10 +122,10 @@ async function rotateTokenOnPreUpdate(tokenDocument, change, options, userId) {
 
 async function rotateTokensOnTarget(user, targetToken, targetActive) {
     const cont = (
-        targetActive             &&
+        targetActive &&
         user.id === game.user.id
     )
-    if (!cont){
+    if (!cont) {
         return;
     }
 
@@ -147,10 +147,23 @@ async function rotateTokensOnTarget(user, targetToken, targetActive) {
             )
         }));
     await canvas.scene.updateEmbeddedDocuments("Token", updates);
+
+    setTimeout(function () {
+        const updates2 = controlled
+            .filter(t => shouldRotate(t.document))
+            .filter(t => t.id !== targetToken.id)
+            .map(controlledToken => ({
+                _id: controlledToken.id,
+                rotation: core.normalizeDegrees(controlledToken.document.rotation)
+            }));
+        await canvas.scene.updateEmbeddedDocuments("Token", updates2);
+        // Something you want delayed.
+
+    }, 5000);
 }
 
 
-async function injectAutoRotateOptions(app, html, data){
+async function injectAutoRotateOptions(app, html, data) {
     const enabled = data.object.flags[core.MODULE_SCOPE]?.["enabled"]
     const offset = data.object.flags[core.MODULE_SCOPE]?.["offset"]
     const form = html.find("div[data-tab='appearance']:first");
@@ -158,14 +171,14 @@ async function injectAutoRotateOptions(app, html, data){
         "modules/autorotate/templates/token-config-snippet.html",
         {
             selectDefault: enabled == null,
-            selectYes    : enabled === true,
-            selectNo     : enabled === false,
-            offsetToSet  : offset,
+            selectYes: enabled === true,
+            selectNo: enabled === false,
+            offsetToSet: offset,
         }
     );
     form.append(snippet);
 }
 
-Hooks.on("preUpdateToken",    rotateTokenOnPreUpdate);
-Hooks.on("targetToken",       rotateTokensOnTarget);
+Hooks.on("preUpdateToken", rotateTokenOnPreUpdate);
+Hooks.on("targetToken", rotateTokensOnTarget);
 Hooks.on("renderTokenConfig", injectAutoRotateOptions);
