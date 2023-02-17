@@ -148,7 +148,8 @@ async function rotateTokensOnTarget(user, targetToken, targetActive) {
         }));
     await canvas.scene.updateEmbeddedDocuments("Token", updates);
 
-    setTimeout(function () {
+    (async () => {
+        await sleep(3000)
         const updates2 = controlled
             .filter(t => shouldRotate(t.document))
             .filter(t => t.id !== targetToken.id)
@@ -156,10 +157,10 @@ async function rotateTokensOnTarget(user, targetToken, targetActive) {
                 _id: controlledToken.id,
                 rotation: core.normalizeDegrees(controlledToken.document.rotation)
             }));
-        canvas.scene.updateEmbeddedDocuments("Token", updates2);
+        await canvas.scene.updateEmbeddedDocuments("Token", updates2);
         // Something you want delayed.
 
-    }, 5000);
+    })()
 }
 
 
