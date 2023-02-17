@@ -156,7 +156,7 @@ async function rotateTokensOnTarget(user, targetToken, targetActive) {
                 _id: controlledToken.id,
                 rotation: core.normalizeDegrees(controlledToken.document.rotation)
             }));
-        await canvas.scene.updateEmbeddedDocuments("Token", updates2);
+        canvas.scene.updateEmbeddedDocuments("Token", updates2);
         // Something you want delayed.
 
     }, 5000);
