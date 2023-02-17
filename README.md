@@ -14,6 +14,7 @@ Credit also goes to [TyphonJS's](https://github.com/typhonjs-fvtt) [demo-rollup-
   - Per-token rotation settings.
   - Rotation on token movement.
   - Rotation on token targeting.
+  - Rotate back after targetting..
 
 ## Future Functionality ##
   - Per-direction token sprites.
